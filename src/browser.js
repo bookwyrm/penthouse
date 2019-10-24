@@ -1,4 +1,3 @@
-import puppeteer from 'puppeteer'
 import debug from 'debug'
 
 const debuglog = debug('penthouse:browser')
@@ -17,16 +16,6 @@ export function removeJob () {
   ongoingJobs = ongoingJobs - 1
 }
 
-const DEFAULT_PUPPETEER_LAUNCH_ARGS = [
-  '--disable-setuid-sandbox',
-  '--no-sandbox',
-  '--ignore-certificate-errors'
-  // better for Docker:
-  // https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md#tips
-  // (however caused memory leaks in Penthouse when testing in Ubuntu, hence disabled)
-  // '--disable-dev-shm-usage'
-]
-
 export async function launchBrowserIfNeeded ({ getBrowser, width, height }) {
   if (browser) {
     return
@@ -35,18 +24,6 @@ export async function launchBrowserIfNeeded ({ getBrowser, width, height }) {
   if (usingCustomGetBrowser && !_browserLaunchPromise) {
     debuglog('using browser provided via getBrowser option')
     _browserLaunchPromise = Promise.resolve(getBrowser())
-  }
-  if (!_browserLaunchPromise) {
-    debuglog('no browser instance, launching new browser..')
-
-    _browserLaunchPromise = puppeteer.launch({
-      args: DEFAULT_PUPPETEER_LAUNCH_ARGS,
-      ignoreHTTPSErrors: true,
-      defaultViewport: {
-        width,
-        height
-      }
-    })
   }
   _browserLaunchPromise.then(async browser => {
     debuglog('browser ready')
